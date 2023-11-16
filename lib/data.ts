@@ -1,12 +1,35 @@
-import { tasks } from "./placeholder-data";
+import { sql } from "@vercel/postgres";
 import { Task } from "./definitions";
+import { unstable_noStore as noStore } from "next/cache";
 
-const getCompletedTasks = (): Task[] => {
-  return tasks.filter((task) => task.completed);
-};
+export async function fetchCompletedTasks() {
+  noStore();
+  try {
+    const data = await sql<Task>`SELECT * FROM tasks WHERE completed = true`;
 
-const getInCompletedTasks = (): Task[] => {
-  return tasks.filter((task) => !task.completed);
-};
+    return data.rows;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch tasks data.");
+  }
+}
 
-export { getCompletedTasks, getInCompletedTasks };
+export async function fetchInCompletedTasks() {
+  noStore();
+  try {
+    const data = await sql<Task>`SELECT * FROM tasks WHERE completed = false`;
+
+    return data.rows;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch tasks data.");
+  }
+}
+
+// const getCompletedTasks = (): Task[] => {
+//   return tasks.filter((task) => task.completed);
+// };
+
+// const getInCompletedTasks = (): Task[] => {
+//   return tasks.filter((task) => !task.completed);
+// };
